@@ -1,0 +1,31 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# In the Render dashboard: New > Blueprint > pick this repo. It creates the database and the web
+# service, wires them together and generates a JWT secret.
+databases:
+  - name: chatroom-db
+    plan: free
+    databaseName: chatroom
+    user: chatroom
+
+services:
+  - type: web
+    name: chatroom
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase: { name: chatroom-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: chatroom-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: chatroom-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: chatroom-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: chatroom-db, property: password }
+      - key: JAVA_OPTS
+        value: "-XX:MaxRAMPercentage=75 -XX:+UseSerialGC"

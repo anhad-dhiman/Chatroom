@@ -1,0 +1,25 @@
+# Build output
+target/
+dist/
+*.class
+*.jar
+!backend/.mvn/wrapper/maven-wrapper.jar
+
+# Dependencies
+node_modules/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

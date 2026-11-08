@@ -1,0 +1,39 @@
+# One command to run everything:   docker compose up --build
+# Then open http://localhost:8080
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: chatroom
+      POSTGRES_USER: chatroom
+      POSTGRES_PASSWORD: chatroom
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatroom -d chatroom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: chatroom
+      DB_USER: chatroom
+      DB_PASSWORD: chatroom
+      # Set a real secret in .env (see .env.example); this fallback is for local use only.
+      JWT_SECRET: ${JWT_SECRET:-local-docker-secret-change-me-local-docker-secret}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:

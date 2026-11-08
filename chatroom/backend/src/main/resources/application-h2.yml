@@ -1,0 +1,7 @@
+# Zero-setup demo profile: in-memory database, no PostgreSQL needed.
+# Run with:  ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+spring:
+  datasource:
+    url: jdbc:h2:mem:chatroom;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:

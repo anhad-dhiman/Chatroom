@@ -8,6 +8,7 @@ than every test.
 
 from __future__ import annotations
 
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -29,7 +30,11 @@ class BasePage:
         self.driver = driver
         # Explicit wait: poll until a condition is true (or time out). Never use time.sleep(),
         # which is either too short (flaky) or too long (slow).
-        self.wait = WebDriverWait(driver, config.TIMEOUT)
+        #
+        # StaleElementReferenceException is retried too: React replaces or removes DOM nodes when state
+        # changes (e.g. the last reaction chip disappears), so an element found a moment ago can vanish
+        # before we read it. That just means "not settled yet, poll again", not a failure.
+        self.wait = WebDriverWait(driver, config.TIMEOUT, ignored_exceptions=(StaleElementReferenceException,))
 
     def visit(self, path: str = "/") -> None:
         self.driver.get(config.BASE_URL + path)

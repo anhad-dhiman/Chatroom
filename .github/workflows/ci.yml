@@ -2,10 +2,12 @@
 # Each job calls ./run-tests.sh, the same script developers run locally.
 name: CI
 
+# Runs on pull requests and on main. (Running on every branch push as well would run the whole pipeline
+# twice for each commit on a branch with an open pull request.)
 on:
   push:
-  pull_request:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 # A newer push to the same branch cancels the run that's already in progress.

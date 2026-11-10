@@ -47,7 +47,7 @@ export function NewDirectModal({ online, onClose, onOpen }: Props) {
         {users?.length === 0 && <li className="muted padded">Nobody found.</li>}
         {users?.map((user) => (
           <li key={user.id}>
-            <button className="picker-row" onClick={() => void open(user)}>
+            <button className="picker-row" data-testid="user-result" onClick={() => void open(user)}>
               <Avatar user={user} size={32} online={Boolean(online[user.id])} />
               <span className="row-text">
                 <span className="row-title">{user.displayName}</span>

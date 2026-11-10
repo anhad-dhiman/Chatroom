@@ -33,7 +33,7 @@ export function AuthScreen({ theme }: { theme: ReturnType<typeof useTheme> }) {
   };
 
   return (
-    <main className="auth-screen">
+    <main className="auth-screen" data-testid="auth-screen">
       <button className="icon-button theme-corner" onClick={theme.toggle} aria-label="Toggle dark mode">
         {theme.theme === 'dark' ? <SunIcon /> : <MoonIcon />}
       </button>
@@ -51,6 +51,7 @@ export function AuthScreen({ theme }: { theme: ReturnType<typeof useTheme> }) {
           <label>
             Username
             <input
+              name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
@@ -61,13 +62,14 @@ export function AuthScreen({ theme }: { theme: ReturnType<typeof useTheme> }) {
           {mode === 'register' && (
             <label>
               <span>Display name <span className="muted">(optional)</span></span>
-              <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={64} />
+              <input name="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={64} />
             </label>
           )}
           <label>
             Password
             <input
               type="password"
+              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}

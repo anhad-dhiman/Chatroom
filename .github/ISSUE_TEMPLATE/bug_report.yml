@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a defect so it can be reproduced and fixed
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence describing what's wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as user A
+        2. Open #general
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: See docs/TEST_PLAN.md for definitions.
+      options:
+        - Critical (data loss, security, app unusable)
+        - Major (core feature broken, no workaround)
+        - Minor (workaround exists)
+        - Trivial (cosmetic)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "e.g. Chrome 131 on Windows 11, local Docker, commit abc1234"
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshots, server log excerpt, failing test name or CI run link.

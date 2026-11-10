@@ -23,3 +23,11 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Test reports and Python tooling
+reports/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.tsbuildinfo

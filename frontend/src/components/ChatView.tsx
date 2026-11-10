@@ -111,7 +111,7 @@ export function ChatView({ conversation, messages, hasMore, currentUser, online,
           other && <Avatar user={other} size={34} online={Boolean(online[other.id])} />
         )}
         <div className="chat-title">
-          <h1>{title}</h1>
+          <h1 data-testid="chat-title">{title}</h1>
           <p className="muted">
             {isRoom
               ? `${conversation.memberCount} ${conversation.memberCount === 1 ? 'member' : 'members'}${conversation.description ? ` · ${conversation.description}` : ''}`

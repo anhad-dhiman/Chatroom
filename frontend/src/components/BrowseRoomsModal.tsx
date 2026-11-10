@@ -65,7 +65,7 @@ export function BrowseRoomsModal({ onClose, onOpen, onSelectExisting }: Props) {
         {rooms?.length === 0 && <li className="muted padded">No rooms match “{query}”. Create it below!</li>}
         {rooms?.map((room) => (
           <li key={room.id}>
-            <button className="picker-row" onClick={() => void join(room)}>
+            <button className="picker-row" data-testid="room-result" onClick={() => void join(room)}>
               <span className="room-icon"><HashIcon width={16} height={16} /></span>
               <span className="row-text">
                 <span className="row-title">{room.name}</span>
@@ -84,11 +84,11 @@ export function BrowseRoomsModal({ onClose, onOpen, onSelectExisting }: Props) {
         <h3>Create a room</h3>
         <label>
           Name
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. book-club" maxLength={33} required />
+          <input name="roomName" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. book-club" maxLength={33} required />
         </label>
         <label>
           <span>Description <span className="muted">(optional)</span></span>
-          <input value={description} onChange={(e) => setDescription(e.target.value)} maxLength={255} />
+          <input name="roomDescription" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={255} />
         </label>
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="button primary" type="submit" disabled={creating || name.trim().length < 2}>

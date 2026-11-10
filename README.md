@@ -1,5 +1,7 @@
 # Chatroom
 
+[![CI](https://github.com/anhad-dhiman/Chatroom/actions/workflows/ci.yml/badge.svg)](https://github.com/anhad-dhiman/Chatroom/actions/workflows/ci.yml)
+
 A full-stack, real-time chat application with public rooms, private direct messages, reactions, unread tracking and presence, built with **Spring Boot**, **WebSockets (STOMP)**, **PostgreSQL** and **React + TypeScript**.
 
 > **Live demo:** _add your Render URL here after deploying (see [Deployment](#deployment))_
@@ -44,7 +46,9 @@ A full-stack, real-time chat application with public rooms, private direct messa
 - Stateless **JWT** auth with BCrypt password hashing; the WebSocket is authenticated on the STOMP `CONNECT` frame
 - Authorization on every read and write (non-members get `403`, including over the socket)
 - Versioned schema migrations with **Flyway**
-- **59 automated tests**: backend integration tests (REST + a real WebSocket client) and frontend unit/component tests
+- **96 automated tests** across four layers: Java unit and integration tests (including a real WebSocket client), React unit/component tests, and a **Python + Selenium** end-to-end suite that drives real browsers
+- **CI pipeline (GitHub Actions)**: lint, all test layers, and a Docker build + smoke test on every push, with per-test reports and failure screenshots
+- One **Bash** entry point (`run-tests.sh`) used both locally and in CI
 - One-command local run with **Docker Compose**, plus a one-click **Render** blueprint
 
 ## Tech stack
@@ -55,7 +59,8 @@ A full-stack, real-time chat application with public rooms, private direct messa
 | Auth      | JWT (jjwt), BCrypt |
 | Database  | PostgreSQL 16, Flyway migrations; H2 in-memory for tests and demo mode |
 | Frontend  | React 18, TypeScript, Vite, @stomp/stompjs, hand-written CSS with theme variables |
-| Testing   | JUnit 5, Spring Boot Test, MockMvc, AssertJ, Vitest, React Testing Library |
+| Testing   | JUnit 5, Spring Boot Test, MockMvc, AssertJ, Vitest, React Testing Library, Python, pytest, Selenium WebDriver |
+| CI / tooling | GitHub Actions, Bash, shellcheck, ruff |
 | DevOps    | Multi-stage Dockerfile, Docker Compose, Render blueprint |
 
 ## Architecture
@@ -149,14 +154,47 @@ All settings have local defaults; override them with environment variables in pr
 | `PORT` | `8080` | HTTP port (set automatically by most hosts) |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Only needed if the frontend is hosted on a different origin |
 
-## Running the tests
+## Testing & CI
+
+| Layer | Tool | Tests | Where |
+|-------|------|------:|-------|
+| Backend unit + integration | JUnit 5, Spring Boot Test, MockMvc, STOMP client | 35 | `backend/src/test` |
+| Frontend unit + component | Vitest, React Testing Library | 24 | `frontend/src/**/*.test.ts(x)` |
+| End-to-end (black-box) | Python, pytest, Selenium WebDriver | 37 | `e2e/` |
+| Deployment smoke test | Docker Compose, curl | 3 checks | `.github/workflows/ci.yml` |
+
+Everything runs through one script, locally and in CI:
 
 ```bash
-cd backend && ./mvnw test     # 35 tests: REST integration, WebSocket integration, unit tests
-cd frontend && npm test       # 24 tests: state reducer, formatting helpers, components
+./run-tests.sh                 # backend + frontend (fast, ~30 s)
+./run-tests.sh --e2e           # build + start the app, run Selenium tests, stop it
+./run-tests.sh --e2e --smoke   # only the critical-path browser tests
+./run-tests.sh --all           # lint + every test layer
+./run-tests.sh --help
 ```
 
-Backend tests run against an in-memory H2 database in PostgreSQL mode, using the same Flyway migrations as production. `WebSocketIntegrationTest` starts the server on a random port and connects real STOMP clients to check delivery, privacy (outsiders receive nothing) and token rejection.
+> On Windows, run it from **Git Bash** (installed with Git for Windows) or WSL. The E2E suite needs Python 3.10+ and Chrome; Selenium downloads the matching driver automatically.
+
+Reports are written to `reports/`: JUnit XML for every layer, plus `reports/e2e/report.html` with a screenshot of the browser for any failing test.
+
+**Highlights**
+- Backend integration tests run against an in-memory H2 database in PostgreSQL mode, using the same Flyway migrations as production. `WebSocketIntegrationTest` connects real STOMP clients to check delivery, privacy (outsiders receive nothing) and token rejection.
+- The Selenium suite uses the **Page Object Model**, explicit waits (no `sleep`), stable `data-testid` locators, per-test isolated data created through the API, and **two simultaneous browsers** to verify real-time delivery. See [`e2e/README.md`](e2e/README.md).
+- The test strategy, scope, entry/exit criteria, defect severity levels and quality metrics are written up in [`docs/TEST_PLAN.md`](docs/TEST_PLAN.md). Bugs are filed with a structured GitHub issue template.
+
+**CI pipeline** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push and pull request:
+
+```mermaid
+flowchart LR
+    push([push / PR]) --> lint[Lint<br/>shellcheck + ruff]
+    push --> be[Backend tests]
+    push --> fe[Frontend tests]
+    push --> docker[Docker build +<br/>smoke test on PostgreSQL]
+    be --> e2e[Selenium E2E<br/>headless Chrome]
+    fe --> e2e
+```
+
+Each job publishes per-test results to the GitHub checks tab, and the E2E job uploads its HTML report, screenshots and server log as a downloadable artifact. Combined with branch protection on `main`, a failing job blocks the merge.
 
 ## API reference
 
@@ -233,7 +271,15 @@ The same Docker image runs on any container host (Railway, Fly.io, AWS App Runne
 │       ├── state/                chat reducer (pure, unit-tested)
 │       ├── components/           UI components
 │       └── lib/                  formatting helpers
-├── docs/                         screenshots
+├── e2e/                          Python + Selenium end-to-end suite (see e2e/README.md)
+│   ├── framework/                config, WebDriver factory, REST client for test data
+│   ├── pages/                    Page Objects
+│   └── tests/                    auth, access control, search, messaging, real-time
+├── .github/
+│   ├── workflows/ci.yml          CI pipeline
+│   └── ISSUE_TEMPLATE/           structured bug report form
+├── docs/                         screenshots, TEST_PLAN.md
+├── run-tests.sh                  single entry point for every test layer (local + CI)
 ├── Dockerfile                    multi-stage build: frontend → backend → slim JRE image
 ├── docker-compose.yml            app + PostgreSQL
 └── render.yaml                   one-click cloud deployment

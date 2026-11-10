@@ -38,7 +38,7 @@ export function Sidebar(props: Props) {
       </header>
 
       {status !== 'connected' && (
-        <div className={`connection-banner ${status}`} role="status">
+        <div className={`connection-banner ${status}`} role="status" data-testid="connection-banner">
           {status === 'connecting' ? 'Connecting…' : 'Connection lost. Reconnecting…'}
         </div>
       )}
@@ -82,7 +82,7 @@ export function Sidebar(props: Props) {
       <footer className="sidebar-footer">
         <button className="me" onClick={props.onEditProfile} title="Edit profile">
           <Avatar user={currentUser} size={32} online={status === 'connected'} />
-          <span className="me-text">
+          <span className="me-text" data-testid="current-user">
             <span className="me-name">{currentUser.displayName}</span>
             <span className="me-username">@{currentUser.username}</span>
           </span>
@@ -122,6 +122,8 @@ function ConversationRow({ conversation, active, icon, title, subtitle, onSelect
   const unread = conversation.unreadCount > 0 && !active;
   return (
     <button
+      data-testid="conversation-row"
+      data-conversation-id={conversation.id}
       className={`conversation-row ${active ? 'is-active' : ''} ${unread ? 'is-unread' : ''}`}
       onClick={() => onSelect(conversation.id)}
       aria-current={active ? 'page' : undefined}
@@ -129,13 +131,13 @@ function ConversationRow({ conversation, active, icon, title, subtitle, onSelect
       {icon}
       <span className="row-text">
         <span className="row-top">
-          <span className="row-title">{title}</span>
+          <span className="row-title" data-testid="conversation-title">{title}</span>
           {conversation.lastMessageAt && <span className="row-time">{formatRelative(conversation.lastMessageAt)}</span>}
         </span>
         <span className="row-subtitle">{subtitle}</span>
       </span>
       {unread && (
-        <span className="badge" aria-label={`${conversation.unreadCount} unread`}>
+        <span className="badge" data-testid="unread-badge" aria-label={`${conversation.unreadCount} unread`}>
           {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
         </span>
       )}

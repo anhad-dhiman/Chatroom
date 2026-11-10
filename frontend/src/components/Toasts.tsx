@@ -20,7 +20,7 @@ export function Toasts({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} className="toast">{t.message}</div>
+        <div key={t.id} className="toast" data-testid="toast">{t.message}</div>
       ))}
     </div>
   );

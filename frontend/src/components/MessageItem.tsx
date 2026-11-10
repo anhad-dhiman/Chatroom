@@ -56,6 +56,8 @@ export const MessageItem = memo(function MessageItem({ message, currentUserId, s
 
   return (
     <article
+      data-testid="message"
+      data-message-id={message.id}
       className={`message ${showHeader ? 'has-header' : 'is-grouped'} ${own ? 'is-own' : ''}`}
       onMouseLeave={() => { setPicker(false); setConfirmDelete(false); }}
       aria-label={`${message.sender.displayName} at ${formatTime(message.createdAt)}`}
@@ -75,7 +77,7 @@ export const MessageItem = memo(function MessageItem({ message, currentUserId, s
         )}
 
         {message.deleted ? (
-          <p className="message-body is-deleted">This message was deleted</p>
+          <p className="message-body is-deleted" data-testid="message-deleted">This message was deleted</p>
         ) : editing ? (
           <div className="edit-box">
             <textarea
@@ -94,7 +96,7 @@ export const MessageItem = memo(function MessageItem({ message, currentUserId, s
             </div>
           </div>
         ) : (
-          <p className="message-body">
+          <p className="message-body" data-testid="message-body">
             {linkify(message.content ?? '').map((part, i) =>
               part.kind === 'link' ? (
                 <a key={i} href={part.value} target="_blank" rel="noreferrer noopener">{part.value}</a>
@@ -102,7 +104,7 @@ export const MessageItem = memo(function MessageItem({ message, currentUserId, s
                 <span key={i}>{part.value}</span>
               ),
             )}
-            {message.editedAt && <span className="edited" title={new Date(message.editedAt).toLocaleString()}> (edited)</span>}
+            {message.editedAt && <span className="edited" data-testid="message-edited" title={new Date(message.editedAt).toLocaleString()}> (edited)</span>}
           </p>
         )}
 
@@ -113,6 +115,7 @@ export const MessageItem = memo(function MessageItem({ message, currentUserId, s
               return (
                 <button
                   key={r.emoji}
+                  data-testid="reaction"
                   className={`reaction ${mine ? 'is-mine' : ''}`}
                   onClick={() => onReact(message.id, r.emoji)}
                   aria-pressed={mine}
